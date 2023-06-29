@@ -1,46 +1,45 @@
 const express = require("express");
-const axios = require("axios");
 const cors = require("cors");
 require("dotenv").config();
-const app = express();
-const PORT = 3000; // You can change this to your desired port number
-const YOUR_OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-app.use(express.json());
-app.use(cors());
+const { Configuration, OpenAIApi } = require("openai");
 
-// Define the route for code conversion
+const app = express();
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+// Initialize OpenAI API client
+const configuration = new Configuration({
+  apiKey: OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+app.use(express.json());
+app.use(cors()); // Enable CORS middleware
+
 app.post("/convert", async (req, res) => {
   try {
     const { code, targetLanguage } = req.body;
-    res.send(code, targetLanguage);
-    // Make a request to the OpenAI API to convert the code
-    // const response = await axios.post(
-    //   "https://api.openai.com/v1/engines/davinci-codex/completions",
-    //   {
-    //     prompt: `Translate the following code from ${targetLanguage} to ${code}`,
-    //     max_tokens: 200,
-    //     temperature: 0.8,
-    //     n: 1,
-    //     stop: ["\n"],
-    //   },
-    //   {
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${YOUR_OPENAI_API_KEY}`, // Replace with your OpenAI API key
-    //     },
-    //   }
-    // );
+    console.log(code, targetLanguage);
+    // Construct the prompt
+    const prompt = `Translate the following code to ${targetLanguage}:\n\n${code}\n\n`;
 
-    // const convertedCode = response.data.choices[0].text;
-
-    // res.json({ convertedCode });
+    // Call OpenAI API for code conversion
+    const response = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt: prompt,
+      temperature: 0.5,
+      max_tokens: 100,
+      top_p: 1,
+      frequency_penalty: 0.8,
+      presence_penalty: 0,
+    });
+    console.log(response.data);
+    const convertedCode = response.data.choices[0].text;
+    res.json({ convertedCode });
   } catch (error) {
     console.error("Error during code conversion:", error);
-    res.status(500).json({ error: "Failed to convert the code." });
+    res.status(500).json({ error: "Error during code conversion" });
   }
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(3001, () => {
+  console.log("Server is running on port 3001");
 });

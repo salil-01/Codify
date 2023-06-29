@@ -37,12 +37,13 @@ function CodeEditor() {
       const code = editorRef.current.getValue();
       console.log(selectedLanguage, code);
       const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/convert`,
+        `${import.meta.env.VITE_APP_BACKEND_URL}/convert`,
         {
           code,
           targetLanguage: selectedLanguage,
         }
       );
+      console.log(response);
       setConvertedCode(response.data.convertedCode);
     } catch (error) {
       console.error("Error during code conversion:", error);
