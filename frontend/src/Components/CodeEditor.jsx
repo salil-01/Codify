@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import * as monaco from "monaco-editor";
 // import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-
+const url = "https://codify-backend.onrender.com";
 function CodeEditor() {
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [convertedCode, setConvertedCode] = useState("");
@@ -43,13 +43,10 @@ function CodeEditor() {
       }
 
       setIsLoading(true);
-      const response = await axios.post(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/convert`,
-        {
-          code,
-          targetLanguage: selectedLanguage,
-        }
-      );
+      const response = await axios.post(`${url}/convert`, {
+        code,
+        targetLanguage: selectedLanguage,
+      });
       setConvertedCode(response.data.convertedCode);
     } catch (error) {
       console.error("Error during code conversion:", error);
@@ -68,12 +65,9 @@ function CodeEditor() {
       }
 
       setIsLoading(true);
-      const response = await axios.post(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/debug`,
-        {
-          code,
-        }
-      );
+      const response = await axios.post(`${url}/debug`, {
+        code,
+      });
       setConvertedCode(response.data.debuggedCode);
     } catch (error) {
       console.error("Error during code debugging:", error);
@@ -91,12 +85,9 @@ function CodeEditor() {
       }
 
       setIsLoading(true);
-      const response = await axios.post(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/quality-check`,
-        {
-          code,
-        }
-      );
+      const response = await axios.post(`${url}/quality-check`, {
+        code,
+      });
       setConvertedCode(response.data.checkedCode);
     } catch (error) {
       console.error("Error during quality check:", error);
@@ -115,7 +106,7 @@ function CodeEditor() {
       </Center>
       <Grid
         templateColumns="repeat(4, 1fr)"
-        margin={"auto"}
+        margin={"40px auto"}
         alignItems="center"
         // border={"1px solid red"}
         width={"80%"}
