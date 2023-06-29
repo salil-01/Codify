@@ -35,7 +35,7 @@ function CodeEditor() {
   const handleConvert = async () => {
     try {
       const code = editorRef.current.getValue();
-
+      console.log(selectedLanguage, code);
       const response = await axios.post("/convert", {
         code,
         targetLanguage: selectedLanguage,
