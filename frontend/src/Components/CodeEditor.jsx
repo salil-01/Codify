@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import {
   Box,
@@ -7,18 +7,19 @@ import {
   Heading,
   Select,
   Textarea,
-  VStack,
   useColorModeValue,
 } from "@chakra-ui/react";
-import * as monaco from "monaco-editor";
+// import * as monaco from "monaco-editor";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 
 function CodeEditor() {
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [convertedCode, setConvertedCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const editorRef = React.useRef(null);
+  const editorRef = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     editorRef.current = monaco.editor.create(
       document.getElementById("editor"),
       {
@@ -35,7 +36,11 @@ function CodeEditor() {
   const handleConvert = async () => {
     try {
       const code = editorRef.current.getValue();
-      console.log(selectedLanguage, code);
+      if (code.trim() === "" || selectedLanguage === "") {
+        return; // Skip conversion if code editor is empty or no language is selected
+      }
+
+      setIsLoading(true);
       const response = await axios.post(
         `${import.meta.env.VITE_APP_BACKEND_URL}/convert`,
         {
@@ -43,10 +48,11 @@ function CodeEditor() {
           targetLanguage: selectedLanguage,
         }
       );
-      console.log(response);
       setConvertedCode(response.data.convertedCode);
     } catch (error) {
       console.error("Error during code conversion:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,8 +75,8 @@ function CodeEditor() {
           <option value="javascript">JavaScript</option>
           {/* Add more language options */}
         </Select>
-        <Button colorScheme="teal" onClick={handleConvert}>
-          Convert
+        <Button colorScheme="teal" onClick={handleConvert} disabled={isLoading}>
+          {isLoading ? "Converting..." : "Convert"}
         </Button>
       </Grid>
       <Grid templateColumns="repeat(2, 1fr)" gap={4}>
@@ -85,7 +91,7 @@ function CodeEditor() {
             Output
           </Heading>
           <Textarea
-            value={convertedCode}
+            value={isLoading ? "Converting Code..." : convertedCode}
             readOnly
             h="400px"
             resize="none"
