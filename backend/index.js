@@ -66,6 +66,32 @@ app.post("/debug", async (req, res) => {
     res.status(500).json({ error: "Error during code debugging" });
   }
 });
+app.post("/quality-check", async (req, res) => {
+  try {
+    const { code } = req.body;
+    console.log(code);
+
+    // Construct the prompt
+    const prompt = `Perform a quality check on the following code:\n\n${code}\n\nProvide feedback on the code quality and suggest improvements:\n\n---\n`;
+
+    // Call OpenAI API for code quality check
+    const response = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt: prompt,
+      temperature: 0.5,
+      max_tokens: 100,
+      top_p: 1,
+      frequency_penalty: 0.8,
+      presence_penalty: 0,
+    });
+    console.log(response.data);
+    const checkedCode = response.data.choices[0].text;
+    res.json({ checkedCode });
+  } catch (error) {
+    console.error("Error during quality check:", error);
+    res.status(500).json({ error: "Error during quality check" });
+  }
+});
 
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
