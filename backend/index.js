@@ -40,6 +40,33 @@ app.post("/convert", async (req, res) => {
   }
 });
 
+app.post("/debug", async (req, res) => {
+  try {
+    const { code } = req.body;
+    console.log(code);
+
+    // Construct the prompt
+    const prompt = `Debug the following code:\n\n${code}\n\nHighlight and correct any errors in the code, providing line-by-line explanations:\n\n---\n`;
+
+    // Call OpenAI API for code debugging
+    const response = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt: prompt,
+      temperature: 0.5,
+      max_tokens: 100,
+      top_p: 1,
+      frequency_penalty: 0.8,
+      presence_penalty: 0,
+    });
+    console.log(response.data);
+    const debuggedCode = response.data.choices[0].text;
+    res.json({ debuggedCode });
+  } catch (error) {
+    console.error("Error during code debugging:", error);
+    res.status(500).json({ error: "Error during code debugging" });
+  }
+});
+
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
 });

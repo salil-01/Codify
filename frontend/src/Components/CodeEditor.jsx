@@ -56,13 +56,35 @@ function CodeEditor() {
     }
   };
 
+  const handleDebug = async () => {
+    try {
+      const code = editorRef.current.getValue();
+      console.log(code);
+      if (code.trim() === "") {
+        return; // Skip debugging if code editor is empty
+      }
+
+      setIsLoading(true);
+      const response = await axios.post(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/debug`,
+        {
+          code,
+        }
+      );
+      setConvertedCode(response.data.debuggedCode);
+    } catch (error) {
+      console.error("Error during code debugging:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const textEditorBgColor = useColorModeValue("white", "gray.800");
   const outputBgColor = useColorModeValue("gray.100", "gray.700");
   const outputTextColor = useColorModeValue("black", "white");
 
   return (
     <Box p={4}>
-      <Grid templateColumns="repeat(3, 1fr)" gap={4} mb={4} alignItems="center">
+      <Grid templateColumns="repeat(4, 1fr)" gap={4} mb={4} alignItems="center">
         <Select
           value={selectedLanguage}
           onChange={handleLanguageChange}
@@ -76,7 +98,14 @@ function CodeEditor() {
           {/* Add more language options */}
         </Select>
         <Button colorScheme="teal" onClick={handleConvert} disabled={isLoading}>
-          {isLoading ? "Converting..." : "Convert"}
+          Convert
+        </Button>
+        <Button
+          colorScheme="teal"
+          onClick={handleDebug}
+          // disabled={isLoading || code.trim() === "" || selectedLanguage === ""}
+        >
+          Debug
         </Button>
       </Grid>
       <Grid templateColumns="repeat(2, 1fr)" gap={4}>
